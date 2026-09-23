@@ -103,6 +103,10 @@
     "min_zip_coverage": {
       "value": 0.5, "unit": "share of tract housing units", "classification": "assumption",
       "note": "A tract's ZIP-based value is flagged if ZIPs with data cover less than this share of its housing units."
+    },
+    "min_zori_months": {
+      "value": 12, "unit": "months with data in the latest 13", "classification": "assumption",
+      "note": "A ZIP's Zillow rent is used only if it has at least this many monthly values in the latest 13 months. ZIPs new to the index often rest on a handful of listings."
     }
   }
 }

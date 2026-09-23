@@ -54,6 +54,14 @@ def test_rent_rises_with_bedrooms(tracts):
             assert 1000 < rents[0] and rents[-1] < 15000, (g, series)
 
 
+def test_home_value_fallback_not_above_larger_home(tracts):
+    for g, r in tracts.items():
+        v, src = r["zhvi"], r["zhvi_series"]
+        if src["2"] == "zhvi_2br":
+            for b in "01":
+                assert v[b] <= v["2"], (g, b)
+
+
 def test_zillow_rent_mostly_available(tracts):
     missing = [g for g, r in tracts.items() if r["rent_zillow"] is None]
     assert len(missing) / len(tracts) < 0.1

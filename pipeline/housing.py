@@ -70,8 +70,25 @@ def _zillow_latest(path) -> tuple[dict[str, float], str]:
     return s.astype(float).to_dict(), last
 
 
-def zori_by_zip():
-    return _zillow_latest(RAW / "Zip_zori_uc_sfrcondomfr_sm_month.csv")
+def zori_by_zip() -> tuple[dict[str, float], str, list[str]]:
+    """Latest ZORI by ZIP, keeping only ZIPs with enough recent history.
+
+    A ZIP new to the index can rest on a few listings (Half Moon Bay, 94019, entered in 2026
+    with three months of data), so its level is not comparable to established ZIPs.
+    Returns (values, month, dropped ZIPs).
+    """
+    path = RAW / "Zip_zori_uc_sfrcondomfr_sm_month.csv"
+    header = pd.read_csv(path, nrows=0).columns
+    recent = [c for c in header if c[:2] == "20"][-13:]
+    df = pd.read_csv(path, usecols=["RegionName", *recent], dtype={"RegionName": str})
+    df["zip"] = df.RegionName.str.zfill(5)
+    df = df.set_index("zip")
+    min_months = assumptions()["display"]["min_zori_months"]["value"]
+    last = recent[-1]
+    has_latest = df[last].notna()
+    enough = df[recent].notna().sum(axis=1) >= min_months
+    dropped = sorted(df.index[has_latest & ~enough])
+    return df.loc[has_latest & enough, last].astype(float).to_dict(), last, dropped
 
 
 def zhvi_by_zip():
@@ -96,7 +113,7 @@ def pmms_latest() -> dict:
 def tract_housing(geoids: list[str]) -> tuple[dict[str, dict], dict]:
     zw = zip_weights()
     safmr = safmr_by_zip()
-    zori, zori_month = zori_by_zip()
+    zori, zori_month, zori_dropped = zori_by_zip()
     zillow_rent = zillow_rent_by_zip(safmr, zori)
     zhvi, zhvi_month = zhvi_by_zip()
     min_cov = assumptions()["display"]["min_zip_coverage"]["value"]
@@ -141,9 +158,17 @@ def tract_housing(geoids: list[str]) -> tuple[dict[str, dict], dict]:
                 val[b], src[b] = round(v, -3), "zhvi_all_homes"
             else:
                 val[b], src[b] = None, "unavailable"
+        # The all-homes fallback describes a typical (larger) home, so it can exceed the 2BR value
+        # where no 1BR series exists. A smaller home shouldn't be priced above a larger one.
+        for b in (0, 1):
+            if src[b] == "zhvi_all_homes" and src[2] == "zhvi_2br" and val[b] > val[2]:
+                val[b], src[b] = val[2], "zhvi_2br_cap"
         rec["zhvi"] = val
         rec["zhvi_series"] = src
         rec["flags"] = sorted(set(flags))
         out[g] = rec
+    local = sorted({z for g in geoids for z in zw[g]} & set(zori_dropped))
+    if local:
+        print(f"  ZORI ignored for ZIPs with short history: {local}")
     meta = {"zori_month": zori_month, "zhvi_month": zhvi_month, "safmr_fy": HUD_FY}
     return out, meta

@@ -84,7 +84,9 @@
         (the mean of listings between the 40th and 60th percentile) across all unit sizes. Because ZORI has no bedroom breakdown, we split it:
         rent for a unit of <em>b</em> bedrooms = ZORI × (HUD rent for <em>b</em> bedrooms) ÷ (HUD rent averaged over that ZIP's actual
         mix of rented units by bedroom count, from ACS table B25042). This keeps Zillow's rent level and HUD's ratios between sizes.
-        Where ZIPs with Zillow data hold less than half of a tract's homes, the tool uses HUD instead and says so. Latest Zillow month:
+        A ZIP's Zillow rent counts only if Zillow has published it for at least <span data-assume="display.min_zori_months"></span> of the latest 13 months;
+        ZIPs new to the index can rest on a handful of listings. (Half Moon Bay's ZIP, 94019, first appeared in 2026 and is left out for this reason.)
+        Where ZIPs with usable Zillow data hold less than half of a tract's homes, the tool uses HUD instead and says so. Latest Zillow month:
         <span data-param="meta.housing.zori_month"></span>.
       </p>
       <p>
@@ -98,7 +100,9 @@
         <span data-assume="owner.down_payment_pct" data-fmt="pct0"></span> down, plus property tax at
         <span data-assume="owner.property_tax_rate" data-fmt="pct1"></span> of price and insurance of
         <span data-assume="owner.homeowners_insurance_annual" data-fmt="usd"></span>/yr. This is the cost of buying today, not what long-time
-        owners pay under Proposition 13. Where no Zillow value covers a tract, owner cost is shown as unavailable rather than estimated.
+        owners pay under Proposition 13. Studios use the 1-bedroom series. Where no bedroom-specific value covers a tract, the all-homes value is used,
+        except that a studio or 1-bedroom is never priced above the same tract's 2-bedroom value (the all-homes value describes a typical, larger home).
+        Where no Zillow value covers a tract, owner cost is shown as unavailable rather than estimated.
       </p>
       <p>
         When parking is included in the rent or the home price, its cost is moved out of Housing and into Car storage, so the two together

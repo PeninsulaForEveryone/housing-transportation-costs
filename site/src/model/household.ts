@@ -115,6 +115,7 @@ export function computeBudget(t: Tract, p: Params, h: Household): Budget {
     items.push({ flow: 'shelter', label: 'Property tax', amount: ptax });
     items.push({ flow: 'shelter', label: 'Homeowners insurance', amount: ins });
     if (t.zhvi_series[h.bedrooms] === 'zhvi_all_homes') notes.push('Home value uses the all-homes series; no bedroom-specific value covers this tract.');
+    if (t.zhvi_series[h.bedrooms] === 'zhvi_2br_cap') notes.push('Home value uses the 2-bedroom value; no smaller-home value covers this tract, and the all-homes value is higher.');
   }
 
   // ---- car storage

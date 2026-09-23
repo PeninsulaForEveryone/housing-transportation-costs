@@ -46,13 +46,15 @@ export const HOUSEHOLD_PRESETS: HouseholdPreset[] = [
 export interface TractPair { id: string; label: string; a: string; b: string }
 
 export const TRACT_PAIRS: TractPair[] = [
-  { id: 'sm-hmb', label: 'Downtown San Mateo vs. Half Moon Bay', a: '06081606300', b: '06081613702' },
+  // Same rent market (ZIP 94402), so the gap is mostly driving rather than rent.
+  { id: 'sm-highlands', label: 'Downtown San Mateo vs. San Mateo Highlands', a: '06081606300', b: '06081606900' },
   { id: 'mb-pac', label: 'Millbrae near BART/Caltrain vs. Pacifica', a: '06081604400', b: '06081603300' },
 ];
 
 /** Contrasting tracts for the build-time sanity table. */
 export const SANITY_TRACTS: [string, string][] = [
   ['06081606300', 'Downtown San Mateo, near Caltrain'],
+  ['06081606900', 'San Mateo Highlands'],
   ['06081613702', 'Half Moon Bay'],
   ['06081605600', 'Hillsborough'],
   ['06081612002', 'East Palo Alto'],
