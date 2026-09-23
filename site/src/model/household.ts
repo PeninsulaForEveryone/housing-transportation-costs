@@ -276,8 +276,6 @@ export function computeBudget(t: Tract, p: Params, h: Household): Budget {
     inflows.push({ id: 'shortfall', label: 'Shortfall', amount: -remainder, classification: 'derived', sources: [], assumptions: [] });
   }
   const outflows: Flow[] = [
-    { id: 'taxes', label: 'Taxes', amount: taxTotal, classification: 'modeled',
-      sources: ['irs_rp_2025_32', 'irs_sch8812', 'irs_pub15_2026', 'irs_amt_qa', 'ftb_2025_schedules', 'ftb_2025_booklet', 'edd_2026_methb', 'edd_sdi_2026'], assumptions: [] },
     { id: 'shelter', label: 'Housing', amount: shelter, classification: shelterClass, sources: shelterSources, assumptions: shelterAssumptions },
     { id: 'car_storage', label: 'Car storage', amount: carStorage, classification: 'modeled', carRelated: true,
       sources: [...storageSources], assumptions: [...storageAssumptions] },
@@ -287,6 +285,9 @@ export function computeBudget(t: Tract, p: Params, h: Household): Budget {
       sources: ['aaa_2025', ...(scaleFuel ? ['eia_ca_gas'] : []), ...(milesSource === 'model' ? ['mtc_vmt'] : [])],
       assumptions: ['vehicle.scale_fuel_to_ca_price', ...(milesSource === 'model' ? ['vmt.days_per_year'] : [])] },
     { id: 'transit', label: 'Transit fares', amount: transit, classification: 'observed', sources: ['caltrain_fares', 'samtrans_fares'], assumptions: [] },
+    // Taxes and what is left over sit last: they matter for the budget but do not change with location.
+    { id: 'taxes', label: 'Taxes (not affected by location)', amount: taxTotal, classification: 'modeled',
+      sources: ['irs_rp_2025_32', 'irs_sch8812', 'irs_pub15_2026', 'irs_amt_qa', 'ftb_2025_schedules', 'ftb_2025_booklet', 'edd_2026_methb', 'edd_sdi_2026'], assumptions: [] },
     { id: 'remainder', label: 'Left after taxes, housing, and transportation', amount: Math.max(0, remainder), classification: 'derived', sources: [], assumptions: [] },
   ];
 

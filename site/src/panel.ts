@@ -2,7 +2,7 @@
 
 import type { Budget } from './model/household';
 import type { Params, Share, SourceInfo, Tract } from './model/types';
-import { CLASS_LEGEND, renderSankey } from './sankey';
+import { renderSankey } from './sankey';
 import { CLASS_LABEL, el, mo, pct, usd, yr } from './format';
 
 const FLAG_TEXT: Record<string, string> = {
@@ -85,9 +85,8 @@ export function renderPanel(o: PanelOptions): HTMLElement {
   const svgEl = renderSankey(b, { width: o.width, height, font, idPrefix: `p${o.letter}`, methodologyHref: METHODOLOGY });
   svgEl.setAttribute('aria-labelledby', `panel-${o.letter}-cap`);
   figure.append(svgEl);
-  figure.append(el('div', { class: 'class-legend' }, CLASS_LEGEND));
   figure.append(el('figcaption', { id: `panel-${o.letter}-cap` }, budgetCaption(b, placeName(t)),
-    ' Select a label to see how it is estimated. The table below has the same numbers.'));
+    ' Hover over or select a label to see how it is estimated. "Show the numbers" below has the same figures as a table.'));
   sec.append(figure);
 
   const dl = el('button', { type: 'button', class: 'button-secondary' }, `Download PNG (${o.letter})`);
@@ -97,7 +96,8 @@ export function renderPanel(o: PanelOptions): HTMLElement {
   const notes = [...b.notes, ...t.flags.map((f) => FLAG_TEXT[f]).filter(Boolean)];
   if (notes.length) sec.append(el('ul', { class: 'notes' }, ...notes.map((n) => el('li', {}, n))));
 
-  // Text alternative: same numbers as the diagram.
+  // Text alternative: same numbers as the diagram, collapsed by default to keep the page short.
+  const numbers = el('details', { class: 'breakdown' }, el('summary', {}, `Show the numbers for ${placeName(t)}`));
   const table = el('table', { class: 'data-table' },
     el('caption', {}, `Annual budget, ${tractTitle(t)}`),
     el('thead', {}, el('tr', {}, ...['Flow', 'Per year', 'Per month', 'How produced', 'Sources'].map((h) => el('th', { scope: 'col' }, h)))),
@@ -123,10 +123,10 @@ export function renderPanel(o: PanelOptions): HTMLElement {
   b.inflows.forEach((f) => row('In:', f));
   b.outflows.filter((f) => f.amount > 0.5 || f.id === 'car_storage').forEach((f) => row('Out:', f));
   table.append(tb);
-  sec.append(el('div', { class: 'table-wrap' }, table));
+  numbers.append(el('div', { class: 'table-wrap' }, table));
 
-  const details = el('details', { class: 'breakdown' }, el('summary', {}, 'Line-item detail'));
   const dt = el('table', { class: 'data-table' },
+    el('caption', {}, 'Line items'),
     el('thead', {}, el('tr', {}, ...['Item', 'Per year', 'Note'].map((h) => el('th', { scope: 'col' }, h)))));
   const dtb = el('tbody');
   for (const it of b.items) {
@@ -134,12 +134,12 @@ export function renderPanel(o: PanelOptions): HTMLElement {
       el('td', {}, [it.note, it.range && it.range[1] > it.range[0] + 1 ? `Range ${yr(it.range[0])} to ${yr(it.range[1])}.` : ''].filter(Boolean).join(' '))));
   }
   dt.append(dtb);
-  details.append(el('div', { class: 'table-wrap' }, dt));
+  numbers.append(el('div', { class: 'table-wrap' }, dt));
   if (b.milesSource === 'model') {
-    details.append(el('p', { class: 'hint' },
+    numbers.append(el('p', { class: 'hint' },
       `Miles: MTC estimates ${t.vmt_per_resident_weekday.toFixed(1)} weekday miles per resident here, times household size, times ${o.params.assumptions.vmt.days_per_year.value} days. This counts home-based trips only and averages over residents who do not drive, so it likely understates driving for car owners. You can enter your own miles.`));
   }
-  sec.append(details);
+  sec.append(numbers);
 
   // Context from the ACS (not used in the arithmetic).
   const acs = t.acs;

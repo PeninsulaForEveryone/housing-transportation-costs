@@ -34,8 +34,6 @@ export const EXPORT_COLORS: Record<string, string> = {
 const SCREEN_FONT = "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif";
 const EXPORT_FONT = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif";
 
-/** Symbols for how each figure was produced. Shape, not color, carries the meaning. */
-export const CLASS_MARK: Record<string, string> = { observed: '●', modeled: '◐', assumption: '○' };
 const CLASS_HELP: Record<string, string> = {
   observed: 'Observed: a published figure used as published.',
   modeled: 'Modeled: calculated from published data with a stated method.',
@@ -43,7 +41,6 @@ const CLASS_HELP: Record<string, string> = {
   derived: 'Derived: arithmetic on the other flows.',
   input: 'Your input.',
 };
-export const CLASS_LEGEND = '● Observed   ◐ Modeled   ○ Assumption. Hover or select a label for details.';
 
 interface N { id: string; flow?: Flow; label: string; column: number }
 interface L { source: string; target: string; value: number; flow: Flow }
@@ -148,7 +145,8 @@ export function renderSankey(b: Budget, o: SankeyOptions): SVGSVGElement {
     } else {
       const toKey = (l.target as SankeyNode<N, L>).flow?.id as FlowId;
       path.setAttribute('fill', color(FLOW_COLOR[fl.id === 'shortfall' ? 'shortfall' : toKey]));
-      path.setAttribute('fill-opacity', '0.35');
+      // Location-dependent costs read strongest; taxes and the remainder recede.
+      path.setAttribute('fill-opacity', toKey === 'taxes' || toKey === 'remainder' ? '0.2' : '0.45');
     }
     const t = svg('title');
     t.textContent = `${fl.label}: ${yr(fl.amount)}/yr (${mo(fl.amount)}/mo)`;
@@ -176,8 +174,7 @@ export function renderSankey(b: Budget, o: SankeyOptions): SVGSVGElement {
     const left = n.column === 0;
     const tx = left ? x0 - f * 0.6 : x1 + f * 0.6;
     const anchor = left ? 'end' : 'start';
-    const reserve = CLASS_MARK[fl.classification] ? 2 : 0; // room for the classification symbol
-    const names = wrapWords(fl.label, Math.floor((left ? leftW : labelW) / (f * 0.6)) - reserve);
+    const names = wrapWords(fl.label, Math.floor((left ? leftW : labelW) / (f * 0.6)));
     const lineH = f * 1.2;
     const blockH = names.length * lineH + f * 1.1;
     let y = (y0 + y1) / 2 - blockH / 2 + f * 0.9;
@@ -185,15 +182,9 @@ export function renderSankey(b: Budget, o: SankeyOptions): SVGSVGElement {
     const help = svg('title');
     help.textContent = `${fl.label}: ${yr(fl.amount)}/yr. ${CLASS_HELP[fl.classification] ?? ''}`;
     g.append(help);
-    names.forEach((line, i) => {
+    names.forEach((line) => {
       const t = svg('text', { x: tx, y, 'text-anchor': anchor, 'font-size': f, 'font-weight': 600, fill: color('var(--ink-1)') });
       t.textContent = line;
-      // The classification symbol follows the name on its last line.
-      if (i === names.length - 1 && CLASS_MARK[fl.classification]) {
-        const badge = svg('tspan', { dx: f * 0.35, 'font-size': f * 0.85, 'font-weight': 400, fill: color('var(--ink-2)'), class: 'badge' });
-        badge.textContent = CLASS_MARK[fl.classification];
-        t.append(badge);
-      }
       g.append(t);
       y += lineH;
     });

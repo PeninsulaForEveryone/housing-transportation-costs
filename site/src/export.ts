@@ -3,7 +3,7 @@
 
 import type { Budget, Comparison } from './model/household';
 import type { Household, Tract } from './model/types';
-import { CLASS_MARK, EXPORT_COLORS, renderSankey } from './sankey';
+import { EXPORT_COLORS, renderSankey } from './sankey';
 import { yr } from './format';
 import { distinctNames } from './panel';
 
@@ -81,7 +81,7 @@ function frame(title: string, subtitle: string[], siteUrl: string): { root: SVGS
     }
   }
   const foot = [
-    ...wrap(`${CLASS_MARK.observed} observed  ${CLASS_MARK.modeled} modeled  ${CLASS_MARK.assumption} assumption. Striped or dashed flow: non-cash value of free curb parking. Sources: Zillow, HUD, FHFA land prices, MTC travel model, AAA, Census, IRS, CA FTB and EDD.`, 18, W - 120),
+    ...wrap('Striped or dashed flow: non-cash value of free curb parking. Sources: Zillow, HUD, FHFA land prices, MTC travel model, AAA, Census, IRS, CA FTB and EDD.', 18, W - 120),
     `Full method and data: ${siteUrl}`,
   ];
   let fy = H - 40 - (foot.length - 1) * 26;
