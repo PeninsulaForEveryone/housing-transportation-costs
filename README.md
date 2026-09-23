@@ -1,5 +1,7 @@
 # What Your Location Costs
 
+**Live site:** https://peninsulaforeveryone.github.io/housing-transportation-costs/
+
 A static web tool that holds one household fixed and shows what it would spend on housing and transportation in two San Mateo County census tracts. Each tract gets a Sankey diagram. The diagrams include the costs of car storage that are easy to miss: parking bundled into rent, the land under a garage, and curb space the city provides for free (shown as a non-cash inflow).
 
 - Every figure traces to `data/sources.json` (fetched sources, with retrieval dates) or `config/assumptions.json` (chosen constants).
