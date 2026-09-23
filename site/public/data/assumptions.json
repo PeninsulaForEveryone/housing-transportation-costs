@@ -1,0 +1,108 @@
+{
+  "_comment": "Every tunable constant lives here. Each entry records its value, unit, classification (assumption | modeled | observed) and why. Values tagged with a source id trace to data/sources.json.",
+
+  "owner": {
+    "down_payment_pct": {
+      "value": 0.20, "unit": "share of price", "classification": "assumption",
+      "note": "Conventional 20% down, avoiding private mortgage insurance."
+    },
+    "mortgage_term_years": {
+      "value": 30, "unit": "years", "classification": "assumption",
+      "note": "Matches the Freddie Mac PMMS 30-year fixed product."
+    },
+    "property_tax_rate": {
+      "value": 0.011, "unit": "share of price per year", "classification": "assumption",
+      "note": "Proposition 13 base rate of 1% plus about 0.1% for local voter-approved levies. Assumes the home was bought at the current value."
+    },
+    "homeowners_insurance_annual": {
+      "value": 2000, "unit": "$/yr", "classification": "assumption",
+      "note": "Placeholder premium. Not sourced; replace with a local quote. Adjustable in the UI."
+    }
+  },
+
+  "vehicle": {
+    "older_car_depreciation_factor": {
+      "value": 0.5, "unit": "multiplier on AAA depreciation", "classification": "assumption",
+      "note": "An older car is assumed to lose value at half the rate of AAA's new-car average."
+    },
+    "older_car_finance_factor": {
+      "value": 0.0, "unit": "multiplier on AAA finance", "classification": "assumption",
+      "note": "An older car is assumed to be paid off."
+    },
+    "scale_fuel_to_ca_price": {
+      "value": true, "unit": "flag", "classification": "modeled",
+      "note": "AAA fuel cost per mile assumes the national average gas price. When true, it is scaled by the ratio of the EIA California 52-week average price to AAA's national price.",
+      "source": "eia_ca_gas"
+    }
+  },
+
+  "vmt": {
+    "days_per_year": {
+      "value": 365, "unit": "days", "classification": "assumption",
+      "note": "MTC reports VMT for a typical weekday. Multiplying by 365 treats every day like that weekday. No published annualization factor was verified, so this is shown as an assumption and can be changed."
+    },
+    "scale_miles_with_car_count": {
+      "value": true, "unit": "flag", "classification": "assumption",
+      "note": "In the what-if where the household keeps fewer cars in tract B, household miles shrink in proportion to the number of cars (for example, one car instead of two halves the miles). Trips shifted to transit, walking, or biking are not costed."
+    }
+  },
+
+  "parking": {
+    "bundled_garage_annual": {
+      "value": 1700, "unit": "$/yr", "classification": "modeled",
+      "note": "Gabbe and Pierce (2017) hedonic estimate of the rent premium for units with garage parking, national American Housing Survey data. Nominal dollars as published.",
+      "source": "gabbe_pierce_2017"
+    },
+    "bundled_carless_annual": {
+      "value": 1700, "unit": "$/yr", "classification": "modeled",
+      "note": "A car-free household renting a unit with a bundled garage pays the same rent premium as a household that uses the space. The paper's separate welfare-loss estimate for carless renters is smaller; that is a loss measure, not what the tenant pays.",
+      "source": "gabbe_pierce_2017"
+    },
+    "bundled_cpi_adjust": {
+      "value": false, "unit": "flag", "classification": "assumption",
+      "note": "Off by default: the published figure is shown in nominal dollars, which understates the 2026 cost. Kept as a switch for testing."
+    },
+    "construction_cost_per_space": {
+      "value": 43000, "unit": "$ per structured space", "classification": "observed",
+      "note": "WGI 2026 Parking Structure Cost Outlook, San Francisco market, hard construction costs only.",
+      "source": "wgi_2026"
+    },
+    "construction_soft_cost_pct": {
+      "value": 0.0, "unit": "share added to hard cost", "classification": "assumption",
+      "note": "WGI says soft costs typically add 15% to 25%. Set to 0 by default to stay conservative."
+    },
+    "construction_discount_rate": {
+      "value": 0.05, "unit": "per year", "classification": "assumption",
+      "note": "Used to annualize construction cost. Matches the land yield."
+    },
+    "construction_life_years": {
+      "value": 50, "unit": "years", "classification": "assumption",
+      "note": "Service life used to annualize construction cost."
+    },
+    "unbundled_monthly_default": {
+      "value": 140, "unit": "$/mo", "classification": "assumption",
+      "note": "Default fee for a separately rented space. Set near the Gabbe and Pierce annual figure divided by 12. Users should enter their actual fee."
+    },
+    "curb_stall_sqft": {
+      "value": 160, "unit": "sq ft", "classification": "assumption",
+      "note": "About 8 ft by 20 ft of curb lane."
+    },
+    "garage_stall_sqft": {
+      "value": 200, "unit": "sq ft", "classification": "assumption",
+      "note": "About 10 ft by 20 ft for a garage or driveway space."
+    },
+    "land_yield": {
+      "value": 0.05, "unit": "per year", "classification": "assumption",
+      "note": "Annual return on land value, used to turn a land price into a yearly rent."
+    }
+  },
+
+  "display": {
+    "round_monthly_to": { "value": 10, "unit": "$", "classification": "assumption", "note": "Displayed monthly dollars round to the nearest $10." },
+    "round_annual_to": { "value": 100, "unit": "$", "classification": "assumption", "note": "Displayed annual dollars round to the nearest $100." },
+    "min_zip_coverage": {
+      "value": 0.5, "unit": "share of tract housing units", "classification": "assumption",
+      "note": "A tract's ZIP-based value is flagged if ZIPs with data cover less than this share of its housing units."
+    }
+  }
+}

@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="data:," />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <title>How this is estimated: What Your Location Costs</title>
+  </head>
+  <body class="doc">
+    <header class="p4e-header">
+      <div class="p4e-header-inner">
+        <a href="https://peninsulaforeveryone.org" target="_blank" rel="noopener">
+          <span class="p4e-logo-mark" aria-hidden="true">P</span>
+          <span>Peninsula for Everyone</span>
+        </a>
+        <span class="p4e-divider" aria-hidden="true">·</span>
+        <span class="p4e-resource-label">Data resource</span>
+      </div>
+    </header>
+    <header class="site-header">
+      <div class="wrap">
+        <p class="kicker"><a href="./" style="color: inherit; text-decoration: none;">What Your Location Costs</a></p>
+        <h1>How this is estimated</h1>
+        <p class="lede">Every source, method, and assumption behind the comparison. <a href="./">Back to the comparison</a>.</p>
+      </div>
+    </header>
+    <main class="wrap prose">
+      <p id="app-error" role="alert"></p>
+
+      <h2 id="design">The design: one household, many places</h2>
+      <p>
+        This tool does not show what the typical resident of a neighborhood spends. It takes one household that you
+        describe (income, people, home size, cars, where the cars are parked, transit passes) and estimates what that same
+        household would spend if it lived in each census tract. The only thing that changes between two diagrams is the place.
+      </p>
+      <p>
+        We avoid neighborhood medians on purpose. Medians do not add up (the median rent plus the median car cost is not the
+        median total), and comparing median residents mixes the effect of place with the effect of who can afford to live there.
+        Holding the household fixed isolates what the location itself costs.
+      </p>
+      <p>
+        San Mateo County has <span data-count="tracts"></span> census tracts with housing in this build. Values are precomputed
+        for each tract; your browser does only the household arithmetic. Nothing you enter leaves your browser, and the address
+        bar holds every input so a view can be shared.
+      </p>
+
+      <h2 id="labels">How to read the labels</h2>
+      <p>Every flow in the diagram carries one of these symbols (hover over a label to see its meaning):</p>
+      <ul>
+        <li><span class="badge-inline">● Observed</span> A published figure used as published: a fare, HUD's rent for this ZIP, AAA's cost of a new car.</li>
+        <li><span class="badge-inline">◐ Modeled</span> Built from published data with a method described here, such as splitting a ZIP-level rent by bedroom count, or valuing curb space by land price.</li>
+        <li><span class="badge-inline">○ Assumption</span> A constant we chose. All of them are listed at the bottom of this page, and most can be changed in the tool.</li>
+      </ul>
+      <p>Displayed dollars are rounded to the nearest $10 per month or $100 per year. Calculations use unrounded values.</p>
+
+      <h2 id="flows">Each flow</h2>
+
+      <h3 id="flow-income">Gross income</h3>
+      <p>Your input. It is treated as wages, split evenly among the workers you enter.</p>
+
+      <h3 id="flow-taxes">Taxes <span class="badge-inline">Modeled</span></h3>
+      <p>
+        Federal income tax uses the 2026 brackets and standard deduction from IRS Revenue Procedure 2025-32, less the child tax
+        credit (up to <span data-param="taxes.federal.ctc_per_child" data-fmt="usd"></span> per child, including the refundable part, phased out
+        above $200,000 of income, or $400,000 for joint filers). California income tax uses the latest published FTB schedule
+        (tax year <span data-param="taxes.ca.tax_year"></span>; EDD's 2026 withholding tables use the same thresholds), the California standard deduction, and
+        personal and dependent exemption credits with their phase-out. Payroll taxes are Social Security
+        (6.2% up to <span data-param="taxes.fica.ss_wage_base" data-fmt="usd"></span> per worker), Medicare (1.45%, plus 0.9% above the filing threshold), and California SDI
+        (<span data-param="taxes.ca.sdi_rate" data-fmt="pct1"></span> of wages, no cap).
+      </p>
+      <p>
+        Filing status is joint for two adults, head of household for one adult with children, and single otherwise. Everyone takes
+        the standard deduction. Every child is assumed to qualify for the child tax credit. The Earned Income Tax Credit, the California
+        renter's credit, and other credits are not included, so taxes for lower-income households are overstated. Taxes are the same in every tract,
+        because the household is the same.
+      </p>
+
+      <h3 id="flow-shelter">Housing <span class="badge-inline">Observed or Modeled</span></h3>
+      <p>
+        <strong>Renters, Zillow (default).</strong> The Zillow Observed Rent Index (ZORI) for each ZIP code measures typical market asking rents
+        (the mean of listings between the 40th and 60th percentile) across all unit sizes. Because ZORI has no bedroom breakdown, we split it:
+        rent for a unit of <em>b</em> bedrooms = ZORI × (HUD rent for <em>b</em> bedrooms) ÷ (HUD rent averaged over that ZIP's actual
+        mix of rented units by bedroom count, from ACS table B25042). This keeps Zillow's rent level and HUD's ratios between sizes.
+        Where ZIPs with Zillow data hold less than half of a tract's homes, the tool uses HUD instead and says so. Latest Zillow month:
+        <span data-param="meta.housing.zori_month"></span>.
+      </p>
+      <p>
+        <strong>Renters, HUD (alternative).</strong> HUD Small Area Fair Market Rents (FY<span data-param="meta.housing.safmr_fy"></span>) by ZIP and bedroom count.
+        These are the 40th percentile of gross rent paid by recent movers, They are below the Zillow-based figure in some tracts and above it in others.
+        We do not use ACS median rents, which include long-time tenants and lag the market.
+      </p>
+      <p>
+        <strong>Owners.</strong> The Zillow Home Value Index for the home size (middle tier, by ZIP), financed at the current Freddie Mac 30-year
+        rate (<span data-param="pmms.rate_30yr" data-fmt="pct2"></span>, week of <span data-param="pmms.week_of"></span>) with
+        <span data-assume="owner.down_payment_pct" data-fmt="pct0"></span> down, plus property tax at
+        <span data-assume="owner.property_tax_rate" data-fmt="pct1"></span> of price and insurance of
+        <span data-assume="owner.homeowners_insurance_annual" data-fmt="usd"></span>/yr. This is the cost of buying today, not what long-time
+        owners pay under Proposition 13. Where no Zillow value covers a tract, owner cost is shown as unavailable rather than estimated.
+      </p>
+      <p>
+        When parking is included in the rent or the home price, its cost is moved out of Housing and into Car storage, so the two together
+        equal the full rent or payment.
+      </p>
+
+      <h3 id="flow-car_storage">Car storage <span class="badge-inline">Modeled</span></h3>
+      <p>Car storage has four parts, depending on where each car is kept.</p>
+      <p>
+        <strong>Garage space included in rent.</strong> Gabbe and Pierce (2017) used national American Housing Survey data to estimate that
+        units with garage parking rent for about <span data-assume="parking.bundled_garage_annual" data-fmt="usd"></span> per year more,
+        about 17% of rent. We use that figure as published, in nominal dollars, which likely understates today's cost. A household without a car
+        in such a unit pays the same premium, so the tool shows a car storage flow even when there is no car. This is the hidden cost of bundled
+        parking. The paper also estimates the welfare loss to carless renters, which is a different measure; we do not use it.
+      </p>
+      <p>
+        As an alternative, you can value a space by what it costs to build: <span data-assume="parking.construction_cost_per_space" data-fmt="usd"></span>
+        per structured space in the San Francisco market (WGI 2026, hard costs only), annualized at
+        <span data-assume="parking.construction_discount_rate" data-fmt="pct0"></span> over
+        <span data-assume="parking.construction_life_years"></span> years, which comes to <span data-computed="construction"></span> per year.
+        Both figures exclude land, and the construction figure excludes soft costs, which WGI says add 15% to 25%.
+      </p>
+      <p>
+        <strong>Space rented separately.</strong> The fee you enter, or a default of <span data-assume="parking.unbundled_monthly_default" data-fmt="usd"></span>/month.
+        California's AB 1317 (Civil Code 1947.1) requires parking to be rented separately from the unit in new buildings of 16 or more units
+        in certain counties, including Alameda and Santa Clara. San Mateo County is not on that list.
+      </p>
+      <p>
+        <strong>Your own garage or driveway, and curb space.</strong> Valued by the land it occupies: land price per square foot ×
+        stall size × an annual yield. Defaults: <span data-assume="parking.garage_stall_sqft"></span> sq ft for a garage or driveway space,
+        <span data-assume="parking.curb_stall_sqft"></span> sq ft for a curb space, and a
+        <span data-assume="parking.land_yield" data-fmt="pct1"></span> yield. Land prices come from FHFA's residential land price data
+        (Davis, Larson, Oliner and Shui), which estimates land value per acre for single-family parcels. The tract estimates are pooled over
+        2012 to 2022 and expressed in 2015 terms; we scale each tract to <span data-param="meta.land.year"></span> using its ZIP code's change in land
+        value (or the county's where the ZIP has none) and carry 2010 tract boundaries to 2020 tracts by land area. Where FHFA has no tract
+        estimate, often in denser areas with few single-family homes, we use the ZIP or county value and flag it on the tract's panel.
+      </p>
+
+      <h3 id="flow-curb_inkind">Free curb storage from the city <span class="badge-inline">Modeled</span></h3>
+      <p>
+        When a car is kept on the street, the household uses public land without paying for it. We show the value of that land as a non-cash
+        inflow (the striped flow) and as part of Car storage. The two are equal, so the household's cash budget is unchanged; the diagram only makes a
+        public subsidy visible. We treat it as income because it is a benefit received, like an employer's in-kind benefit.
+      </p>
+      <p>
+        You can turn this value off in the Cars section; the rest of the budget is unchanged. The value is shown as a range. One end is the land-value estimate above. The other is the market rent for a nearby private space, if you enter one.
+        The lower of the two is used. With no private rent entered, only the land-value estimate is shown. There is no observed data on where
+        cars are parked, so whether a car is on the street is always your input.
+      </p>
+
+      <h3 id="flow-vehicle">Vehicle ownership <span class="badge-inline">Observed</span></h3>
+      <p>
+        AAA's <em>Your Driving Costs 2025</em> national averages for a new car: depreciation <span data-param="aaa.depreciation" data-fmt="usd"></span>,
+        finance <span data-param="aaa.finance" data-fmt="usd"></span>, insurance <span data-param="aaa.insurance" data-fmt="usd"></span>, and license,
+        registration and taxes <span data-param="aaa.license_registration_taxes" data-fmt="usd"></span> per year. For an older car we assume it is paid off
+        (no finance cost) and loses value at <span data-assume="vehicle.older_car_depreciation_factor" data-fmt="pct0"></span> of the new-car rate; that
+        makes the older-car figure Modeled. These are national figures; California insurance and registration costs differ. AAA's newer editions
+        changed methodology and are not directly comparable with this one.
+      </p>
+
+      <h3 id="flow-fuel">Fuel and wear <span class="badge-inline">Modeled</span></h3>
+      <p>
+        Miles × cost per mile. Miles come from MTC's Travel Model 1.5 (Plan Bay Area 2050+, 2023 base year): home-based weekday vehicle miles per
+        resident for each travel analysis zone, averaged to tracts by 2020 population, times the number of people in the household, times
+        <span data-assume="vmt.days_per_year"></span> days. With no cars, miles are zero. You can enter your own miles instead.
+      </p>
+      <p>
+        Cost per mile is AAA's maintenance, repair and tires (<span data-param="aaa.maintenance_per_mile" data-fmt="cents"></span>/mile) plus fuel. AAA's fuel
+        figure (<span data-param="aaa.fuel_per_mile" data-fmt="cents"></span>/mile) assumes gas at <span data-param="aaa.gas_price_basis" data-fmt="usd2"></span>/gallon nationally. We scale
+        it by the California average over the last 52 weeks from EIA (<span data-param="ca_gas.avg_52wk" data-fmt="usd2"></span>/gallon).
+      </p>
+
+      <h3 id="flow-transit">Transit fares <span class="badge-inline">Observed</span></h3>
+      <p>
+        Adult Clipper monthly passes from the Caltrain and SamTrans fare pages. Caltrain monthly passes of 2 or more zones include SamTrans local rides,
+        so a matching SamTrans pass is not charged.
+      </p>
+
+      <h3 id="flow-remainder">Left after taxes, housing, and transportation</h3>
+      <p>
+        Everything else: food, child care, health care, savings. We do not estimate these, because no neighborhood-level source varies them and
+        adding them would suggest more precision than exists. If costs exceed income, a Shortfall inflow balances the diagram.
+      </p>
+
+      <h2 id="geography">Geography</h2>
+      <p>
+        Tracts are 2020 census tracts (Census cartographic boundary file, <span data-count="vintage"></span>). ZIP-level data (rents, home values, land price
+        changes) are assigned to tracts by the share of each tract's 2020 housing units in each ZIP code tabulation area, using census block counts.
+        Travel model zones are assigned by the share of each tract's 2020 population. A ZIP code is much larger than a tract, so rent and home value
+        differences within a ZIP are not captured. The airport tract, which has no housing, is excluded.
+      </p>
+      <p>
+        Place names are for finding tracts only. A tract is named for a Caltrain or BART station within 400 meters of it, or else for a named
+        neighborhood or village from OpenStreetMap that lies inside it. Otherwise it is named for the city that holds most of its homes. The census
+        tract number is always shown alongside.
+      </p>
+
+      <h2 id="what-if">What-if: fewer cars in place B</h2>
+      <p>
+        The comparison normally keeps everything about the household the same, including its cars. You can instead ask what happens if the household
+        keeps fewer cars in place B. The last cars in your list are dropped, along with their parking, and household miles shrink in proportion to the
+        number of cars (<span data-assume="vmt.scale_miles_with_car_count"></span>). Trips that shift to transit, walking, or biking are not costed
+        automatically; add transit passes if they apply. The comparison is labeled as a what-if wherever it appears, including downloaded images.
+      </p>
+
+      <h2 id="limitations">Known limitations</h2>
+      <ul>
+        <li>Rents and home values are ZIP-level, not tract-level. East Palo Alto shares ZIP 94303 with part of Palo Alto, so its Zillow figures reflect Palo Alto listings too.</li>
+        <li>Splitting Zillow's rent by bedroom count assumes HUD's ratios between unit sizes hold for market rents.</li>
+        <li>Land prices are for 2022, the latest FHFA year, and describe single-family parcels. Land under apartments and streets may be valued differently.</li>
+        <li>The bundled parking premium is a national estimate from American Housing Survey data, in nominal dollars. The premium in San Mateo County today may differ.</li>
+        <li>Modeled miles average over all residents, including children and people who do not drive, and count only trips that start or end at home. They likely understate driving for households with cars.</li>
+        <li>ACS figures shown for context come from survey samples; margins of error (90%) are shown, and some tract cross-tabs are wide.</li>
+        <li>There is no observed data on where cars are parked. Street parking is always the user's choice.</li>
+        <li>Vehicle costs are national averages for new cars; insurance and registration in California may differ.</li>
+        <li>Taxes omit the Earned Income Tax Credit and itemized deductions, and assume all income is wages.</li>
+      </ul>
+
+      <h2 id="sources">Sources</h2>
+      <div class="table-wrap"><table class="data-table" id="sources-table">
+        <thead><tr><th scope="col">Source</th><th scope="col">Vintage</th><th scope="col">Retrieved</th><th scope="col">Label</th><th scope="col">Used for</th></tr></thead>
+        <tbody></tbody>
+      </table></div>
+
+      <h2 id="assumptions">Assumptions and constants</h2>
+      <p>From <code>config/assumptions.json</code>. Values marked Observed or Modeled trace to a source above.</p>
+      <div class="table-wrap"><table class="data-table" id="assumptions-table">
+        <thead><tr><th scope="col">Setting</th><th scope="col">Value</th><th scope="col">Label</th><th scope="col">Why</th></tr></thead>
+        <tbody></tbody>
+      </table></div>
+    </main>
+    <footer class="site-footer">
+      <div class="wrap">
+        <div class="footer-p4e">
+          <span class="footer-p4e-mark" aria-hidden="true">P</span>
+          <span class="footer-p4e-text">
+            <strong>Peninsula for Everyone</strong>
+            A grassroots network saying yes to homes, transit, and equitable neighborhoods.
+          </span>
+        </div>
+        <hr class="footer-divider" />
+        <p id="built"></p>
+        <p>Map and place names &copy; OpenStreetMap contributors. <a href="./">Back to the comparison</a>.</p>
+        <hr class="footer-divider" />
+        <p>
+          <strong>More from Peninsula for Everyone:</strong>
+          <a href="https://peninsulaforeveryone.github.io/permit-timeline-tracker/" target="_blank" rel="noopener">Peninsula Permit Tracker</a> ·
+          <a href="https://peninsulaforeveryone.github.io/peninsula-enrollment-decline/" target="_blank" rel="noopener">Enrollment decline vs. housing production</a>
+        </p>
+      </div>
+    </footer>
+    <script type="module" src="/src/methodology.ts"></script>
+  </body>
+</html>

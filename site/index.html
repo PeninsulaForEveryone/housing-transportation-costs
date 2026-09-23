@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="data:," />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <title>What Your Location Costs</title>
+    <meta name="description" content="Compare what one household would spend on housing and transportation in two San Mateo County neighborhoods." />
+  </head>
+  <body>
+    <a class="skip-link" href="#comparison">Skip to the comparison</a>
+    <header class="p4e-header">
+      <div class="p4e-header-inner">
+        <a href="https://peninsulaforeveryone.org" target="_blank" rel="noopener">
+          <span class="p4e-logo-mark" aria-hidden="true">P</span>
+          <span>Peninsula for Everyone</span>
+        </a>
+        <span class="p4e-divider" aria-hidden="true">·</span>
+        <span class="p4e-resource-label">Data resource</span>
+      </div>
+    </header>
+    <header class="site-header">
+      <div class="wrap">
+        <p class="kicker">Housing and transportation costs · San Mateo County</p>
+        <h1>What Your Location Costs</h1>
+        <p class="lede">
+          Describe a household, then pick two places in San Mateo County. See what that same household would spend
+          in each one on housing, cars, transit, and taxes, including costs that are easy to miss, like parking.
+          Where estimates disagree, we generally use the lower one (<a href="methodology.html">how this is estimated</a>).
+        </p>
+      </div>
+    </header>
+
+    <main class="wrap layout">
+      <aside class="sidebar" aria-labelledby="controls-h">
+        <span class="section-label">Step 1</span>
+        <h2 id="controls-h">Your household</h2>
+        <form id="controls" class="controls" onsubmit="return false"></form>
+      </aside>
+
+      <div class="content">
+        <section class="map-section" aria-labelledby="map-h">
+          <span class="section-label">Step 2</span>
+          <h2 id="map-h">Choose two places</h2>
+          <div class="place-search">
+            <label for="place-search">Find a place</label>
+            <input id="place-search" type="search" autocomplete="off" placeholder="City, neighborhood, station, or ZIP" aria-describedby="search-hint" />
+            <div id="search-hint" class="hint">Or select a tract on the map, or pick an example pair.</div>
+            <ul id="search-results" class="search-results" aria-live="polite"></ul>
+          </div>
+          <div class="map-toolbar">
+            <label for="pair" class="visually-hidden">Example pairs</label>
+            <select id="pair"></select>
+            <label for="metric">Map shows</label>
+            <select id="metric"></select>
+          </div>
+          <div id="selection" class="selection"></div>
+          <div id="map" class="map" role="application" aria-label="Map of San Mateo County census tracts. Select a tract, then choose Set as A or Set as B. Place search above does the same without the map."></div>
+          <div id="legend" class="legend" aria-live="polite"></div>
+        </section>
+
+        <section id="comparison" class="comparison" aria-labelledby="summary-h" tabindex="-1">
+          <span class="section-label">Result</span>
+          <h2 id="summary-h" class="visually-hidden">Comparison</h2>
+          <div id="summary" class="summary" aria-live="polite"></div>
+          <div id="panels" class="panels"></div>
+        </section>
+      </div>
+    </main>
+
+    <aside class="wrap siblings" aria-labelledby="siblings-h">
+      <h2 id="siblings-h" class="siblings-label">Also from Peninsula for Everyone</h2>
+      <div class="sibling-grid">
+        <a class="sibling-card" href="https://peninsulaforeveryone.github.io/permit-timeline-tracker/" target="_blank" rel="noopener">
+          <span class="sibling-card-mark" aria-hidden="true">P</span>
+          <span>
+            <span class="sibling-card-title">Peninsula Permit Tracker</span>
+            <span class="sibling-card-sub">How long does your city take to approve housing? Permit timelines, housing-goal progress, and ADU compliance across 22 Peninsula cities.</span>
+          </span>
+        </a>
+        <a class="sibling-card" href="https://peninsulaforeveryone.github.io/peninsula-enrollment-decline/" target="_blank" rel="noopener">
+          <span class="sibling-card-mark" aria-hidden="true">P</span>
+          <span>
+            <span class="sibling-card-title">Enrollment decline vs. housing production</span>
+            <span class="sibling-card-sub">Every San Mateo County school district has lost students since 2018, regardless of how much housing was built nearby.</span>
+          </span>
+        </a>
+      </div>
+    </aside>
+
+    <footer class="site-footer">
+      <div class="wrap">
+        <div class="footer-p4e">
+          <span class="footer-p4e-mark" aria-hidden="true">P</span>
+          <span class="footer-p4e-text">
+            <strong>Peninsula for Everyone</strong>
+            A grassroots network saying yes to homes, transit, and equitable neighborhoods.
+          </span>
+        </div>
+        <hr class="footer-divider" />
+        <p id="app-error" role="alert"></p>
+        <p>
+          <strong>Estimates for one example household, not a quote.</strong> Every figure is labeled observed, modeled, or assumption;
+          see <a href="methodology.html">how this is estimated</a> for every source, assumption, and known limitation.
+        </p>
+        <p>
+          <strong>Data:</strong> Zillow, HUD, Census Bureau (ACS, 2020 Census), FHFA land prices, MTC travel model, AAA, EIA,
+          Freddie Mac, Caltrain, SamTrans, IRS, California FTB and EDD. Map and place names &copy; OpenStreetMap contributors;
+          basemap by OpenFreeMap.
+        </p>
+        <p id="built"></p>
+        <hr class="footer-divider" />
+        <p>
+          <strong>More from Peninsula for Everyone:</strong>
+          <a href="https://peninsulaforeveryone.github.io/permit-timeline-tracker/" target="_blank" rel="noopener">Peninsula Permit Tracker</a> ·
+          <a href="https://peninsulaforeveryone.github.io/peninsula-enrollment-decline/" target="_blank" rel="noopener">Enrollment decline vs. housing production</a>
+        </p>
+      </div>
+    </footer>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

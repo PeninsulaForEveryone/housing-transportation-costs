@@ -1,0 +1,33 @@
+{
+  "name": "what-your-location-costs",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "vite site",
+    "build": "tsc --noEmit && vite build site",
+    "preview": "vite preview site",
+    "test": "vitest run",
+    "sanity": "tsx scripts/sanity.ts"
+  },
+  "devDependencies": {
+    "@types/d3-sankey": "^0.12.5",
+    "@types/d3-selection": "^3.0.12",
+    "@types/d3-shape": "^3.2.0",
+    "@types/geojson": "^7946.0.16",
+    "@types/node": "^26.6.2",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.0",
+    "vitest": "^5.0.1"
+  },
+  "dependencies": {
+    "d3-sankey": "^0.12.3",
+    "d3-selection": "^3.0.0",
+    "d3-shape": "^3.2.0",
+    "maplibre-gl": "^6.11.0"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "_comment": "Counties included in the build. To add a Bay Area county, append an entry; every pipeline step loops over this list.",
+  "state_fips": "06",
+  "state_name": "California",
+  "counties": [
+    {
+      "fips": "081",
+      "name": "San Mateo County",
+      "short_name": "San Mateo",
+      "mtc_county": "San Mateo"
+    }
+  ]
+}
