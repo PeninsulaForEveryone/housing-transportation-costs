@@ -11,7 +11,7 @@ Status 2026-09-22: pipeline, tests, sanity table, and front end done. Rent defau
 - D5 Weights: ZIP to tract uses 2020 block housing units. TAZ to tract uses 2020 block population. Area weights are used only for tracts with no housing.
 - D6 Owners: tracts with no ZHVI coverage show owner cost as unavailable. Only 1 tract is affected (SFO), and it is excluded because it has no housing.
 - D7 Taxes: includes the federal child tax credit (with its refundable part), CA exemption credits with their phase-out, CA SDI, and the Additional Medicare Tax. Every number is checked against the fetched IRS, FTB and EDD documents at build time.
-- D8 Deploy: out of scope. The user handles deployment; no workflow or deploy steps are to be written.
+- D8 Deploy: GitHub Pages via `.github/workflows/pages.yml`, added on request after validation (2026-09-22). CI builds from committed data; no secrets.
 - VMT days/yr: 365 (not 347), because no published source for 347 was found.
 
 ## 1. Source reachability check

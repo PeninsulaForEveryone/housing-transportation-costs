@@ -38,6 +38,14 @@ If a source cannot be fetched or parsed, or a number no longer matches its sourc
 
 For development with live reload: `npm run dev`.
 
+## Publishing (GitHub Pages)
+
+`.github/workflows/pages.yml` builds and publishes the site on every push to `main` (or `master`), and can also be run by hand from the Actions tab. It runs the model tests, then `npm run build`, then deploys `dist/`. It uses the data files already committed in `site/public/data/`, so it needs no Census key and downloads nothing.
+
+One-time setup: in the repository's **Settings > Pages**, set **Source** to **GitHub Actions**.
+
+To publish new data: run `make data && make test` locally, commit the updated `site/public/data/` and `data/sources.json`, and push.
+
 ## Layout
 
 ```
@@ -63,6 +71,7 @@ site/                      Vite + TypeScript front end
   methodology.html         method, sources, assumptions, limitations
 scripts/sanity.ts          sanity table using the site's own model code
 PLAN.md                    source check and decisions
+.github/workflows/pages.yml  build and deploy to GitHub Pages
 ```
 
 ## Changing assumptions
