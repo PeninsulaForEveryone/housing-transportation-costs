@@ -86,9 +86,8 @@ export function renderPanel(o: PanelOptions): HTMLElement {
   svgEl.setAttribute('aria-labelledby', `panel-${o.letter}-cap`);
   figure.append(svgEl);
   figure.append(el('div', { class: 'class-legend' }, CLASS_LEGEND));
-  figure.append(el('figcaption', { id: `panel-${o.letter}-cap` },
-    `Where ${yr(b.inflows.reduce((s, f) => s + f.amount, 0))}/yr goes for this household in ${placeName(t)}. `,
-    'Select a label to see how it is estimated. The table below has the same numbers.'));
+  figure.append(el('figcaption', { id: `panel-${o.letter}-cap` }, budgetCaption(b, placeName(t)),
+    ' Select a label to see how it is estimated. The table below has the same numbers.'));
   sec.append(figure);
 
   const dl = el('button', { type: 'button', class: 'button-secondary' }, `Download PNG (${o.letter})`);
@@ -182,4 +181,15 @@ export function distinctNames(a: Tract, b: Tract): [string, string] {
   if (a.city !== b.city) return [a.city, b.city];
   if (placeName(a) !== placeName(b)) return [placeName(a), placeName(b)];
   return [tractTitle(a), tractTitle(b)];
+}
+
+/** One-sentence description of the diagram: income stated as income, non-cash value and any shortfall stated separately. */
+export function budgetCaption(b: Budget, place: string): string {
+  const amt = (id: string) => b.inflows.find((f) => f.id === id)?.amount ?? 0;
+  const parts = [`Where this household's ${yr(amt('income'))}/yr income goes in ${place}.`];
+  if (amt('curb_inkind') > 0) {
+    parts.push(`The striped or dashed flow is ${yr(amt('curb_inkind'))}/yr of free curb space from the city: shown because it has value, but it is not cash.`);
+  }
+  if (amt('shortfall') > 0) parts.push(`Costs exceed income by ${yr(amt('shortfall'))}/yr, shown as a shortfall.`);
+  return parts.join(' ');
 }

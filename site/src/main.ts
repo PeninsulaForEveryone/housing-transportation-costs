@@ -50,6 +50,7 @@ async function main() {
   const selectionRoot = $('selection');
   const searchInput = $('place-search') as HTMLInputElement;
   const searchResults = $('search-results');
+  const resultBar = $('result-bar');
   let map: MapHandle | null = null;
 
   for (const [k, m] of Object.entries(METRICS)) metricSel.append(el('option', { value: k }, m.label));
@@ -80,6 +81,7 @@ async function main() {
 
   function renderSelection() {
     selectionRoot.replaceChildren();
+    if (TRACT_PAIRS.some((p) => p.a === state.a && p.b === state.b)) selectionRoot.append(el('span', { class: 'example-tag' }, 'Example pair'));
     for (const k of ['a', 'b'] as const) {
       selectionRoot.append(el('span', { class: 'selection-item' },
         el('span', { class: `panel-letter panel-letter-${k}`, 'aria-hidden': 'true' }, k.toUpperCase()),
@@ -144,6 +146,32 @@ async function main() {
   }
   let lastValues: Record<string, number | null> = {};
 
+  /** Pinned bar near the top: each place's yearly cash cost and the difference, visible while editing. */
+  function renderResultBar(a: Budget, b: Budget) {
+    const ta = tracts[state.a], tb = tracts[state.b];
+    const [na, nb] = distinctNames(ta, tb);
+    const inner = el('div', { class: 'wrap result-bar-inner' },
+      el('span', { class: 'rb-label' }, 'Housing + transportation per year, this household:'));
+    const item = (letter: 'a' | 'b', name: string, bud: Budget) => el('span', { class: 'rb-item' },
+      el('span', { class: `panel-letter panel-letter-${letter}`, 'aria-hidden': 'true' }, letter.toUpperCase()),
+      el('span', { class: 'rb-name', title: name }, name),
+      el('strong', { class: 'rb-value' }, bud.available ? yr(bud.cashCost) : 'n/a'));
+    inner.append(item('a', na, a), item('b', nb, b));
+    if (a.available && b.available) {
+      const d = b.cashCost - a.cashCost;
+      inner.append(el('span', { class: 'rb-diff' }, Math.abs(d) < 50
+        ? 'About the same'
+        : el('span', {}, 'B costs ', el('strong', {}, `${yr(Math.abs(d))} ${d > 0 ? 'more' : 'less'}`))));
+    }
+    if (state.bCars != null) inner.append(el('span', { class: 'rb-note' }, `B: what-if with ${plural(state.bCars)}`));
+    if (presetMatch(state.household)) {
+      inner.append(el('a', { href: '#controls-h', class: 'rb-example' }, 'Example household: change it'));
+    }
+    inner.append(el('a', { href: '#comparison', class: 'rb-link' }, 'See the breakdown'));
+    resultBar.replaceChildren(inner);
+    document.documentElement.style.setProperty('--bar-h', `${resultBar.offsetHeight}px`);
+  }
+
   function renderSummary(a: Budget, b: Budget) {
     summaryRoot.replaceChildren();
     const ta = tracts[state.a], tb = tracts[state.b];
@@ -153,7 +181,7 @@ async function main() {
     // What-if: fewer cars in B.
     let whatIf = '';
     if (h.cars.length > 0) {
-      const opts: [string, string][] = [['', `Same as A (${plural(h.cars.length)})`]];
+      const opts: [string, string][] = [['', `${plural(h.cars.length)} (same as A)`]];
       for (let n = h.cars.length - 1; n >= 0; n--) opts.push([String(n), plural(n)]);
       const sel = el('select', { id: 'what-if' });
       for (const [v, l] of opts) {
@@ -163,10 +191,10 @@ async function main() {
       }
       sel.addEventListener('change', () => { state.bCars = sel.value === '' ? null : Number(sel.value); update(); });
       summaryRoot.append(el('div', { class: 'what-if' },
-        el('label', { for: 'what-if' }, `What if, living in ${nb}, this household kept`), sel));
+        el('label', { for: 'what-if' }, `In ${nb}, this household would own:`), sel));
       if (state.bCars != null) {
         const dropped = h.cars.slice(state.bCars);
-        whatIf = `What-if: in B the household keeps ${plural(state.bCars)} instead of ${plural(h.cars.length)}.`;
+        whatIf = `What-if: in B the household owns ${plural(state.bCars)} instead of ${plural(h.cars.length)}.`;
         summaryRoot.append(el('p', { class: 'hint' },
           `${whatIf} The last ${dropped.length > 1 ? `${dropped.length} cars in the list are` : 'car in the list is'} dropped along with ${dropped.length > 1 ? 'their' : 'its'} parking, and miles shrink in proportion. Any new transit fares are not added; set transit passes above if needed.`));
       }
@@ -182,6 +210,21 @@ async function main() {
       ? `Living in ${nb} (B) costs this household about the same as ${na} (A).`
       : `Living in ${nb} (B) instead of ${na} (A) costs this household ${yr(Math.abs(c.diff))}/yr ${dir(c.diff)} (${mo(Math.abs(c.diff))}/mo).`;
     summaryRoot.prepend(el('p', { class: 'summary-headline' }, headline));
+    // Say plainly when the numbers describe an example rather than the visitor.
+    const exHousehold = HOUSEHOLD_PRESETS.find((p) => p.id === presetMatch(h));
+    const exPair = TRACT_PAIRS.some((p) => p.a === state.a && p.b === state.b);
+    if (exHousehold || exPair) {
+      const bits: (string | HTMLElement)[] = ['Showing '];
+      if (exHousehold) bits.push(`an example household (${exHousehold.label.charAt(0).toLowerCase()}${exHousehold.label.slice(1)})`);
+      if (exHousehold && exPair) bits.push(' in ');
+      if (exPair) bits.push('two example places');
+      bits.push('. ');
+      if (exHousehold) bits.push(el('a', { href: '#controls-h' }, 'Change the household'), ' to match yours');
+      if (exHousehold && exPair) bits.push(', and ');
+      if (exPair) bits.push(el('a', { href: '#map-h' }, exHousehold ? 'set A to where you live now and B to a place you\'re considering' : 'Set A to where you live now and B to a place you\'re considering'));
+      bits.push('.');
+      summaryRoot.prepend(el('p', { class: 'example-note' }, ...bits));
+    }
 
     // Where the difference comes from, by category. Signs are spelled out, never shown by color alone.
     const signed = (x: number) => (Math.abs(x) < 50 ? 'same' : `${x > 0 ? '+' : '−'}${yr(Math.abs(x))}`);
@@ -195,7 +238,8 @@ async function main() {
     const body = el('tbody');
     for (const x of c.categories) {
       if (x.a < 0.5 && x.b < 0.5) continue;
-      body.append(el('tr', {}, el('th', { scope: 'row' }, x.label),
+      const label = x.id === 'car_storage' && h.tenure === 'own' ? 'Parking in your home cost or paid separately' : x.label;
+      body.append(el('tr', {}, el('th', { scope: 'row' }, label),
         el('td', { class: 'num' }, yr(x.a)), el('td', { class: 'num' }, yr(x.b)), el('td', { class: 'num' }, signed(x.diff))));
     }
     body.append(el('tr', { class: 'total' }, el('th', { scope: 'row' }, 'Total housing and transportation'),
@@ -231,7 +275,7 @@ async function main() {
       const hh = k === 'b' ? householdB(state.household) : state.household;
       panelsRoot.append(renderPanel({
         letter, geoid: g, tract: tracts[g], budget, params, sources, width,
-        note: k === 'b' && state.bCars != null ? `What-if: this household keeps ${plural(state.bCars)} here instead of ${plural(state.household.cars.length)}.` : undefined,
+        note: k === 'b' && state.bCars != null ? `What-if: this household owns ${plural(state.bCars)} here instead of ${plural(state.household.cars.length)}.` : undefined,
         onDownload: () => downloadPng(singleExportSvg({ tract: tracts[g], geoid: g, budget, letter }, hh, siteUrl()),
           `location-cost-${tracts[g].name}.png`),
       }));
@@ -247,6 +291,7 @@ async function main() {
     renderControls(controlsRoot, h, params, update, presetMatch(h), {
       a: modelMiles(state.a), b: modelMiles(state.b), aName: placeName(tracts[state.a]), bName: placeName(tracts[state.b]),
     });
+    renderResultBar(a, b);
     renderSummary(a, b);
     renderPanels(a, b);
     renderSelection();
@@ -275,6 +320,8 @@ async function main() {
     $('map').append(el('p', { class: 'unavailable' }, 'The map could not load. Use place search or the example pairs above.'));
     console.error(e);
   }
+
+  new ResizeObserver(() => document.documentElement.style.setProperty('--bar-h', `${resultBar.offsetHeight}px`)).observe(resultBar);
 
   let lastWidth = panelsRoot.clientWidth;
   new ResizeObserver(() => {

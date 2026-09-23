@@ -75,12 +75,35 @@ h2 { font-size: 1.25rem; font-weight: 700; }
 
 .section-label { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--brand); background: var(--brand-faint); padding: 3px 10px; border-radius: 20px; margin-bottom: 8px; }
 
+/* ── Pinned result bar ── */
+:root { --bar-h: 52px; }
+.result-bar { position: sticky; top: 0; z-index: 30; background: var(--surface); border-bottom: 1px solid var(--axis); box-shadow: 0 2px 8px rgba(17,27,23,0.06); }
+.result-bar:empty { display: none; }
+.result-bar-inner { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px; padding-block: 10px; font-size: 14px; }
+.rb-label { color: var(--ink-2); font-size: 13px; }
+.rb-item { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
+.rb-item .panel-letter { width: 22px; height: 22px; font-size: 11px; }
+.rb-name { max-width: 22ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink-2); }
+.rb-value { font-variant-numeric: tabular-nums; }
+.rb-diff { padding: 2px 12px; border-radius: 99px; background: var(--brand-faint); color: var(--brand-dark); }
+.rb-note { font-size: 12px; color: var(--ink-2); border: 1px dashed var(--flow-car); border-radius: 99px; padding: 1px 10px; }
+.rb-link { margin-left: auto; font-weight: 600; font-size: 13px; }
+.rb-example { font-size: 12px; font-weight: 600; padding: 2px 10px; border-radius: 99px; background: #fef4e4; color: #7a4208; text-decoration: none; }
+.rb-example:hover { color: #7a4208; text-decoration: underline; }
+@media (max-width: 700px) {
+  .rb-label { display: none; }
+  .rb-name { max-width: 11ch; }
+  .result-bar-inner { gap: 4px 12px; font-size: 13px; padding-block: 8px; }
+  .rb-link { margin-left: 0; }
+}
+#comparison, #map-h, #controls-h { scroll-margin-top: calc(var(--bar-h) + 12px); }
+
 /* ── Layout ── */
 .layout { display: grid; gap: 32px; padding-block: 32px 56px; grid-template-columns: minmax(0, 1fr); }
 .sidebar, .content { min-width: 0; }
 @media (min-width: 900px) {
   .layout { grid-template-columns: 340px minmax(0, 1fr); align-items: start; }
-  .sidebar { position: sticky; top: 16px; max-height: calc(100vh - 32px); overflow-y: auto; padding-right: 6px; }
+  .sidebar { position: sticky; top: calc(var(--bar-h) + 16px); max-height: calc(100vh - var(--bar-h) - 32px); overflow-y: auto; padding-right: 6px; }
 }
 
 /* ── Form ── */
@@ -154,6 +177,9 @@ button { font: inherit; cursor: pointer; }
 .comparison { margin-top: 32px; }
 .summary { background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius-lg); padding: 22px 24px; margin-bottom: 24px; }
 .summary p { margin: 0 0 8px; max-width: 80ch; }
+.example-note { font-size: 13.5px; background: #fef4e4; color: #5a3106; border-radius: var(--radius); padding: 8px 12px; }
+.example-note a { color: #5a3106; font-weight: 600; }
+.example-tag { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #7a4208; background: #fef4e4; border-radius: 99px; padding: 2px 10px; }
 .summary-headline { font-size: 1.3rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.3; }
 .summary .button-primary { margin-top: 10px; }
 .what-if { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; margin: 6px 0 8px; font-size: 14px; }

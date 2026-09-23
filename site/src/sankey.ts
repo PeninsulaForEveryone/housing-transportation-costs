@@ -221,9 +221,10 @@ export function renderSankey(b: Budget, o: SankeyOptions): SVGSVGElement {
     }));
   }
 
-  const inflowTotal = inflows.reduce((s, x) => s + x.amount, 0);
+  const incomeAmt = inflows.find((x) => x.id === 'income')?.amount ?? 0;
+  const extra = inflows.filter((x) => x.id !== 'income').map((x) => `${x.label} ${yr(x.amount)}`);
   const title = svg('title');
-  title.textContent = `Budget Sankey: ${yr(inflowTotal)}/yr in, split into ${outflows.map((x) => `${x.label} ${yr(x.amount)}`).join(', ')}.`;
+  title.textContent = `Budget diagram: ${yr(incomeAmt)}/yr income${extra.length ? ` (plus ${extra.join(', ')})` : ''}, split into ${outflows.map((x) => `${x.label} ${yr(x.amount)}`).join(', ')}.`;
   root.prepend(title);
   return root;
 }

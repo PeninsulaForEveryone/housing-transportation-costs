@@ -354,7 +354,7 @@ export function cashByCategory(b: Budget): Record<CategoryDiff['id'], number> {
 
 const CATEGORY_LABEL: Record<CategoryDiff['id'], string> = {
   shelter: 'Housing',
-  car_storage: 'Parking you pay for',
+  car_storage: 'Parking included in rent or paid separately',
   vehicle: 'Owning the cars',
   fuel: 'Fuel and wear',
   transit: 'Transit fares',
