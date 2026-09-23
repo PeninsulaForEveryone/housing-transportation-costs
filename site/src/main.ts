@@ -60,7 +60,7 @@ async function main() {
   for (const p of TRACT_PAIRS) pairSel.append(el('option', { value: p.id }, p.label));
   pairSel.addEventListener('change', () => {
     const p = TRACT_PAIRS.find((x) => x.id === pairSel.value);
-    if (p) { state.a = p.a; state.b = p.b; update(); }
+    if (p) { state.a = p.a; state.b = p.b; state.bCars = p.bCars ?? null; update(); }
   });
 
   function setTract(letter: 'a' | 'b', g: string) {
@@ -295,7 +295,7 @@ async function main() {
     renderSummary(a, b);
     renderPanels(a, b);
     renderSelection();
-    const pair = TRACT_PAIRS.find((p) => p.a === state.a && p.b === state.b);
+    const pair = TRACT_PAIRS.find((p) => p.a === state.a && p.b === state.b && (p.bCars ?? null) === state.bCars);
     pairSel.value = pair?.id ?? '';
     metricSel.value = state.metric;
     if (map) {

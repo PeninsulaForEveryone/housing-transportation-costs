@@ -12,6 +12,12 @@ describe('URL state', () => {
     }
   });
 
+  it('round-trips the default example, including its car-count what-if', () => {
+    const s = defaultState();
+    expect(s.bCars).toBe(TRACT_PAIRS[0].bCars);
+    expect(decode(`?${encode(s)}`, valid)).toEqual(s);
+  });
+
   it('round-trips overrides and optional inputs', () => {
     const s = defaultState();
     s.household.cars = [{ age: 'old', park: 'street' }, { age: 'new', park: 'unbundled' }];

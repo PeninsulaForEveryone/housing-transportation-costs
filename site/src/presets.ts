@@ -43,11 +43,13 @@ export const HOUSEHOLD_PRESETS: HouseholdPreset[] = [
   },
 ];
 
-export interface TractPair { id: string; label: string; a: string; b: string }
+/** bCars: cars the household keeps in B (the what-if), when the example is about owning fewer. */
+export interface TractPair { id: string; label: string; a: string; b: string; bCars?: number }
 
 export const TRACT_PAIRS: TractPair[] = [
-  // Same rent market (ZIP 94402), so the gap is mostly driving rather than rent.
-  { id: 'sm-highlands', label: 'Downtown San Mateo vs. San Mateo Highlands', a: '06081606300', b: '06081606900' },
+  // Same rent market (ZIP 94402), so the gap is driving and the second car, not rent.
+  // ACS: 81% of Highlands households have 2+ cars vs. 41% downtown.
+  { id: 'highlands-sm', label: 'Highlands, 2 cars vs. downtown San Mateo, 1 car', a: '06081606900', b: '06081606300', bCars: 1 },
   { id: 'mb-pac', label: 'Millbrae near BART/Caltrain vs. Pacifica', a: '06081604400', b: '06081603300' },
 ];
 

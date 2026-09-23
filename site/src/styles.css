@@ -118,6 +118,8 @@ select, input[type="number"], input[type="search"] {
   font: inherit; font-size: 14px; padding: 7px 10px; border: 1px solid var(--axis); border-radius: var(--radius);
   background: var(--surface); color: var(--ink-1); width: 100%; min-width: 0; max-width: 100%;
 }
+/* WebKit lets a narrowed select's longest option text spill into page overflow (sideways scroll on iOS). */
+select { overflow: hidden; text-overflow: ellipsis; }
 select:hover, input:hover { border-color: var(--brand-border); }
 .car-row { padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px solid var(--hairline); }
 .car-row .field { margin-bottom: 6px; }

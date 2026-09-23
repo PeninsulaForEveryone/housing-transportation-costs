@@ -23,7 +23,7 @@ const METRICS: Metric[] = ['ht_share', 'car_cost', 'car_storage', 'vmt', 'curb']
 
 export function defaultState(): AppState {
   const pair = TRACT_PAIRS[0];
-  return { household: structuredClone(HOUSEHOLD_PRESETS[0].household), a: pair.a, b: pair.b, metric: 'ht_share', bCars: null };
+  return { household: structuredClone(HOUSEHOLD_PRESETS[0].household), a: pair.a, b: pair.b, metric: 'ht_share', bCars: pair.bCars ?? null };
 }
 
 export function encode(s: AppState): string {
